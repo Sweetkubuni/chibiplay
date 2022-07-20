@@ -5,7 +5,7 @@ package anime
 import (
 	"regexp"
 
-	"test_client/request"
+	"chibiplay/request"
 
 	"golang.org/x/net/html"
 )

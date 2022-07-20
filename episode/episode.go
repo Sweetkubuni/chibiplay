@@ -1,8 +1,8 @@
 package episode
 
 import (
+	"chibiplay/request"
 	"regexp"
-	"test_client/request"
 
 	"golang.org/x/net/html"
 )
