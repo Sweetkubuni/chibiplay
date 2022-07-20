@@ -1,6 +1,9 @@
 package main
 
 import (
+	"chibiplay/anime"
+	"chibiplay/episode"
+	"chibiplay/video"
 	"fmt"
 	"io"
 	"log"
@@ -18,14 +21,13 @@ var LivePrefixState struct {
 var (
 	mainMenu []prompt.Suggest = []prompt.Suggest{
 		{Text: "search", Description: "find content to play"},
-		{Text: "list", Description: "find content to play"},
 		{Text: "play", Description: "plays media "},
 	}
 
-	listMenu []prompt.Suggest = []prompt.Suggest{
-		{Text: "--episodes", Description: "find content to play"},
-		{Text: "--movies", Description: "plays media "},
-		{Text: "--new-season", Description: "find content to play"},
+	searchMenu []prompt.Suggest = []prompt.Suggest{
+		{Text: "--episodes", Description: "list episodes"},
+		{Text: "--only-title", Description: "only show the title"},
+		{Text: "--only-href", Description: "only show the url"},
 	}
 
 	playMenu []prompt.Suggest = []prompt.Suggest{
@@ -47,7 +49,45 @@ func executor(in string) {
 
 	switch blocks[0] {
 	case "search":
-		fmt.Println("you called search")
+		modifiers := map[string]bool{
+			"--episodes":   true,
+			"--only-href":  true,
+			"--only-title": true,
+		}
+		switch len_blocks := len(blocks); {
+		case len_blocks > 3:
+			fmt.Println("search with 4 arguments are not support yet!")
+			return
+		case len_blocks == 3 && modifiers[blocks[1]] && blocks[1] == "--episodes":
+			episodes := episode.SearchEpisode("https://ww2.gogoanime2.org/" + blocks[2])
+			for _, epi := range episodes {
+				fmt.Println(epi.Href)
+			}
+			/* 		case len_blocks == 3 && modifiers[blocks[1]] && blocks[1] == "--only-title":
+			   			animes := anime.SearchAnime("https://ww2.gogoanime2.org/search/" + blocks[2])
+			   			for _, anime := range animes {
+			   				fmt.Println(anime.Title)
+			   			}
+			   		case len_blocks == 3 && modifiers[blocks[1]] && blocks[1] == "--only-href":
+			   			animes := anime.SearchAnime("https://ww2.gogoanime2.org/search/" + blocks[2])
+			   			for _, anime := range animes {
+			   				fmt.Println(anime.Href)
+			   			} */
+		case len_blocks == 2:
+			animes := anime.SearchAnime("https://ww2.gogoanime2.org/search/" + blocks[1])
+			for _, anime := range animes {
+				fmt.Println(anime.Title, " -- ", anime.Href)
+			}
+		default:
+			fmt.Println("search has incorrect number of arguments")
+			fmt.Println("search <anime title>")
+			fmt.Println("search --only-href <anime title>")
+			fmt.Println("search --only-title <anime title>")
+			fmt.Println("search --episodes <anime url>")
+		}
+	case "play":
+		video.PlayVideo("https://ww2.gogoanime2.org" + blocks[1])
+
 	}
 
 	//LivePrefixState.LivePrefix = in + "> "
@@ -58,8 +98,8 @@ func completer(in prompt.Document) []prompt.Suggest {
 	text := strings.TrimSpace(in.Text)
 	blocks := strings.Split(text, " ")
 	switch blocks[0] {
-	case "list":
-		return prompt.FilterHasPrefix(listMenu, in.GetWordBeforeCursor(), true)
+	case "search":
+		return prompt.FilterHasPrefix(searchMenu, in.GetWordBeforeCursor(), true)
 	case "play":
 		return prompt.FilterHasPrefix(playMenu, in.GetWordBeforeCursor(), true)
 	default:

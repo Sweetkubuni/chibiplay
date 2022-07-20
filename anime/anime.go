@@ -11,8 +11,8 @@ import (
 )
 
 type Anime struct {
-	href  string
-	title string
+	Href  string
+	Title string
 }
 
 // e.g https://ww2.gogoanime2.org/search/pokemon
@@ -25,15 +25,15 @@ func SearchAnime(url string) []Anime {
 		anime := Anime{}
 		for _, a := range t.Attr {
 			if a.Key == "href" {
-				anime.href = a.Val
+				anime.Href = a.Val
 			}
 
 			if a.Key == "title" {
-				anime.title = a.Val
+				anime.Title = a.Val
 			}
 		}
 		re := regexp.MustCompile(`/(.*)/`)
-		match := re.FindStringSubmatch(anime.href)
+		match := re.FindStringSubmatch(anime.Href)
 		if len(match) > 1 && match[1] == "anime" {
 			resp = append(resp, anime)
 		}
